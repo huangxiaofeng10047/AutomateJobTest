@@ -1,0 +1,11 @@
+spring:
+ application:
+  name: AutomateJobTest
+logging:
+  level:
+    org.apache.pulsar: error
+    root: info
+    ROOT: info
+    dev.datainmotion.airquality: info
+
+server.port: 8799
