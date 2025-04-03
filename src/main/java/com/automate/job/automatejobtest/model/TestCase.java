@@ -1,20 +1,19 @@
 package com.automate.job.automatejobtest.model;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 public class TestCase {
-     public static Executor EXECUTOR = Executors.newFixedThreadPool(
-            Runtime.getRuntime().availableProcessors(), // 根据CPU核心数动态分配
-            new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r);
-                    thread.setDaemon(true); // 设置为守护线程
-                    thread.setName("CustomExecutorThread"); // 为线程命名
-                    return thread;
-                }
-            }
-    );
+    private static final int CORE_POOL_SIZE = 5;
+    private static final int MAX_POOL_SIZE = 10;
+    private static final int QUEUE_CAPACITY = 100;
+    private static final Long KEEP_ALIVE_TIME = 1L;
+    public static ThreadPoolExecutor EXECUTOR = new ThreadPoolExecutor(
+             CORE_POOL_SIZE,
+             MAX_POOL_SIZE,
+             KEEP_ALIVE_TIME,
+             TimeUnit.SECONDS,
+             new ArrayBlockingQueue<>(QUEUE_CAPACITY),
+             new ThreadPoolExecutor.CallerRunsPolicy());
 }

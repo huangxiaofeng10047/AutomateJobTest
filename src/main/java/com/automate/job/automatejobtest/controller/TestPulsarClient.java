@@ -1,15 +1,18 @@
 package com.automate.job.automatejobtest.controller;
 
 
+import cn.hutool.core.thread.ThreadFactoryBuilder;
 import com.automate.job.automatejobtest.model.*;
 import com.automate.job.automatejobtest.requestDto.PulsarDto;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
 @RestController
+@Slf4j
 public class TestPulsarClient {
 
     @PostMapping("/testpulsar")
@@ -40,23 +43,27 @@ public class TestPulsarClient {
             AbstractJobDefine job5 =
                     new NormalTest(event, "普通消费测试", pulsarClient, 20, admin);
             CompletableFuture<Void> c5 = CompletableFuture.runAsync(job5::start, TestCase.EXECUTOR);
-        AbstractJobDefine job6 = new FailoverConsumerTest(event,"schema测试",pulsarClient,20,admin);
+        AbstractJobDefine job6 = new FailoverConsumerTest(event,"失败转移模式的测试",pulsarClient,20,admin);
         CompletableFuture<Void> c6 = CompletableFuture.runAsync(job6::start, TestCase.EXECUTOR);
-//        AbstractJobDefine job7 = new NormalTest(event,"vlogs test",pulsarClient,20, admin);
-//        CompletableFuture<Void> c7 = CompletableFuture.runAsync(job7::start, TestCase.EXECUTOR);
+        AbstractJobDefine job7 = new SchemaTest(event,"schema测试",pulsarClient,20, admin);
+        CompletableFuture<Void> c7 = CompletableFuture.runAsync(job7::start, TestCase.EXECUTOR);
 
-            CompletableFuture<Void> all = CompletableFuture.allOf( c5,c6);
+            CompletableFuture<Void> all = CompletableFuture.allOf( c5,c6,c7);
             all.whenComplete((___, __) -> {
                 event.FinshAll();
                 pulsarClient.closeAsync();
                 admin.close();
             }).get();
+
         }catch (Exception e){
             e.printStackTrace();
         }finally {
 
         }
 
+
     }
+
+
 
 }

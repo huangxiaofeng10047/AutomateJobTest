@@ -1,6 +1,8 @@
 spring:
  application:
   name: AutomateJobTest
+ profiles:
+   active: local
 logging:
   level:
     org.apache.pulsar: error

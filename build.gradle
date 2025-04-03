@@ -45,3 +45,19 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+def jarname = String.format("%s-%s.jar",project.name,version)
+// 拷贝文件 dependsOn: bootJar 依赖springboot 插件的 bootJar打包命令
+task copyConfigFile(type: Copy, dependsOn: bootJar) {
+	// 清除app目录的历史文件
+	delete "app/"
+	// copy jar包 从 build/libs/ 目录到 app/ 目录
+	from('build/libs/' + jarname)
+	into 'app/'
+	// 重命名成我们要的名字
+	rename(jarname, project.name + '.jar')
+}
+// 依赖 clean 任务
+task buildTodoCoderJar(dependsOn: clean) {
+	dependsOn copyConfigFile
+}
+
