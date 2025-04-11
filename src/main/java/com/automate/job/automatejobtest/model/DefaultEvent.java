@@ -1,5 +1,8 @@
 package com.automate.job.automatejobtest.model;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -14,6 +17,8 @@ public class DefaultEvent implements Event {
     private final AtomicInteger failedJobs = new AtomicInteger(0);
     private final List<String> completionMessages = Collections.synchronizedList(new ArrayList<>());
     private final List<String> errorMessages = Collections.synchronizedList(new ArrayList<>());
+    private final List<TestCaseModel> testCases =Collections.synchronizedList(new ArrayList<>());
+    private final List<TestCaseModel> testCasesErr =Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void addJob() {
@@ -26,8 +31,8 @@ public class DefaultEvent implements Event {
     public void FinishOne(String jobName, String message) {
         completedJobs.incrementAndGet();
         completionMessages.add(String.format("任务名称 '%s'  %s", jobName, message));
-        log.info("Job '{}' completed: {}", jobName, message);
-
+        testCases.add(TestCaseModel.builder().name(jobName).message(message).build());
+        log.info("任务名称 '{}' cost: {}", jobName, message);
         checkAllJobsCompleted();
     }
 
@@ -36,6 +41,8 @@ public class DefaultEvent implements Event {
         failedJobs.incrementAndGet();
         String errorMessage = String.format("任务名称 '%s' failed: %s", jobDefine.getJobName(), exception.getMessage());
         errorMessages.add(errorMessage);
+//        testCases.removeIf(testCase -> testCase.getName().equals(jobDefine.getJobName()));
+        testCasesErr.add(TestCaseModel.builder().name(jobDefine.getJobName()).message(exception.getMessage()).build());
         log.error(errorMessage, exception);
 
         checkAllJobsCompleted();
@@ -43,6 +50,7 @@ public class DefaultEvent implements Event {
 
     @Override
     public void FinshAll() {
+//        cleanup();
         log.info("=== 所有作业执行完成 ===");
 //        log.info("执行总结: {}", summary);
         log.info("总作业数: {}", totalJobs.get());
@@ -61,13 +69,33 @@ public class DefaultEvent implements Event {
         }
 
         // 触发清理工作（如果需要）
-        cleanup();
+//        cleanup();
+    }
+
+    @Override
+    public List<TestCaseModel> toJsonString() {
+        if (!testCasesErr.isEmpty()) {
+            testCasesErr.stream().forEach(
+                    testCaseModel -> {
+                        testCases.removeIf(testCaseModel1 -> testCaseModel.getName().equals(testCaseModel1.getName()));
+                        testCases.add(testCaseModel);
+                    }
+            );
+            testCasesErr.clear();
+        }
+        return testCases;
+    }
+
+    @Override
+    public void clear() {
+       cleanup();
     }
 
     private void cleanup() {
         // 可以在这里添加资源清理的代码
         completionMessages.clear();
         errorMessages.clear();
+        testCases.clear();
     }
 
     private void checkAllJobsCompleted() {

@@ -26,6 +26,6 @@ public class ThreadUtils {
             log.info("Number of Tasks : {}", threadPool.getCompletedTaskCount());
             log.info("Number of Tasks in Queue: {}", threadPool.getQueue().size());
             log.info("=========================");
-        }, 0, 1, TimeUnit.SECONDS);
+        }, 0, 30, TimeUnit.SECONDS);
     }
 }
