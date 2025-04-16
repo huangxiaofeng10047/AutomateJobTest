@@ -1,4 +1,15 @@
 #!/bin/bash
+
+
+# 检查 .env 文件是否存在
+if [ -f .env ]; then
+    # 导入 .env 文件中的环境变量
+    source .env
+    # 或者使用 . 命令
+    # . .env
+else
+    echo ".env 文件不存在，跳过环境变量导入。"
+fi
 # 打jar包
 ./gradlew buildTodoCoderJar
 # 构建docker镜像
