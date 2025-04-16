@@ -21,7 +21,7 @@ import java.util.concurrent.*;
 public class TestPulsarClient {
     // 用于存储任务状态
     private static final Map<String, CompletableFuture<ResponseData<Object>>> taskMap = new HashMap<>();
-    @PostMapping("/startTestPulsar")
+    @PostMapping("/testpulsar")
     @ResponseBody
     public ResponseData<String> startTestPulsarClient(@RequestBody PulsarDto pulsarDto) {
         String taskId = UUID.randomUUID().toString();
