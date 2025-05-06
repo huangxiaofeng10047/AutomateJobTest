@@ -11,7 +11,7 @@ else
     echo ".env 文件不存在，跳过环境变量导入。"
 fi
 # 打jar包
-./gradlew buildTodoCoderJar
+./gradlew clean buildTodoCoderJar
 # 构建docker镜像
 docker build -t $DEVHARBOR/kuboard/todocoder-gradle:v1.0.0 .
 docker push $DEVHARBOR/kuboard/todocoder-gradle:v1.0.0
@@ -37,6 +37,11 @@ spec:
       app: todocoder-gradle
   template:
     metadata:
+      annotations:
+        prometheus.io/application: AutomateJobTest
+        prometheus.io/path: /metrics
+        prometheus.io/port: '8799'
+        prometheus.io/scrape: 'true'
       labels:
         app: todocoder-gradle
     spec:

@@ -28,31 +28,20 @@ public class TestPulsarClient {
         CompletableFuture<ResponseData<Object>> future = CompletableFuture.supplyAsync(() -> {
             // 配置 Pulsar 的服务地址和认证 Token
             String result = "";
-            PulsarClient pulsarClient = null;
-            PulsarAdmin admin = null;
             try {
                 String pulsarServiceUrl = pulsarDto.getPulsarServiceUrl();
                 String pulsarHttpServiceUrl = pulsarDto.getPulsarHttpServiceUrl();
                 String authToken = pulsarDto.getAuthToken();
                 // 实例化 PulsarClient
-                pulsarClient = PulsarClient.builder()
+                PulsarClient   pulsarClient = PulsarClient.builder()
                         .serviceUrl(pulsarServiceUrl)
                         .authentication(
                                 org.apache.pulsar.client.api.AuthenticationFactory.token(authToken)
                         )
-                        .operationTimeout(60, TimeUnit.SECONDS)      // 操作超时时间
-                        .connectionTimeout(60, TimeUnit.SECONDS)     // 连接超时时间
-                        .keepAliveInterval(30, TimeUnit.SECONDS)     // 保活间隔
-                        .maxNumberOfRejectedRequestPerConnection(100)
-                        .enableTcpNoDelay(true)
-                        // 启用TCP无延迟
-//                     .enableTransaction(true)                    // 启用事务支持
-                        .startingBackoffInterval(100, TimeUnit.MILLISECONDS)
-                        .maxBackoffInterval(60, TimeUnit.SECONDS)
                         .build();
 
                 // 实例化 PulsarAdmin
-                admin = PulsarAdmin.builder()
+                PulsarAdmin     admin = PulsarAdmin.builder()
                         .serviceHttpUrl(pulsarHttpServiceUrl)
                         .authentication(
                                 org.apache.pulsar.client.api.AuthenticationFactory.token(authToken)
@@ -73,32 +62,15 @@ public class TestPulsarClient {
                 CompletableFuture<Void> all = CompletableFuture.allOf(c5, c6, c7);
                 all.whenComplete((___, __) -> {
                     event.FinshAll();
-//                pulsarClient.closeAsync();
-//                admin.close();
+                pulsarClient.closeAsync();
+                admin.close();
                 }).get();
 //            // 最后才关闭连接
-//            if (pulsarClient != null) {
-//                pulsarClient.closeAsync();
-//            }
-//            if (admin != null) {
-//                admin.close();
-//            }
                 return ResponseData.success(event.toJsonString());
 
             } catch (Exception e) {
                 log.error("测试执行失败", e);
                 return ResponseData.error(500, "测试执行失败: " + e.getMessage());
-            } finally {
-                try {
-                    if (pulsarClient != null) {
-                        pulsarClient.closeAsync();
-                    }
-                    if (admin != null) {
-                        admin.close();
-                    }
-                } catch (Exception e) {
-                    log.error("关闭连接失败", e);
-                }
             }
         });
         taskMap.put(taskId, future);

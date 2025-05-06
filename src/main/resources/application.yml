@@ -3,11 +3,25 @@ spring:
   name: AutomateJobTest
  profiles:
    active: local
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+      path-mapping:
+        prometheus: /metrics
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 logging:
   level:
     org.apache.pulsar: error
     root: info
     ROOT: info
     dev.datainmotion.airquality: info
-
 server.port: 8799
+
